@@ -63,9 +63,11 @@ export async function POST(req: NextRequest) {
 
     const recentMessages = messages.slice(-HISTORY_WINDOW);
 
-    const stream = client.messages.stream({
+    // Stream 전체를 먼저 받아서 에러 여부 확인 후 Response 반환
+    const response = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 4096,
+      stream: true,
       system: systemBlocks,
       messages: recentMessages.map(m => ({ role: m.role, content: m.content })),
     });
@@ -74,13 +76,15 @@ export async function POST(req: NextRequest) {
     const readable = new ReadableStream({
       async start(controller) {
         try {
-          for await (const chunk of stream) {
+          for await (const chunk of response) {
             if (chunk.type === 'content_block_delta' && chunk.delta.type === 'text_delta') {
               controller.enqueue(encoder.encode(chunk.delta.text));
             }
           }
           controller.close();
         } catch (err) {
+          const msg = err instanceof Error ? err.message : String(err);
+          console.error('chat stream error:', msg, err);
           controller.error(err);
         }
       },
