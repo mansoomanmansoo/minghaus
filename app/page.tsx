@@ -317,6 +317,21 @@ export default function Home() {
             모아진 후원금은 서버 운영에만 사용됩니다.
           </p>
 
+          {/* QR 이미지 */}
+          <div style={{ marginBottom: '1.5rem' }}>
+            <img
+              src="/kakaopay-qr.jpeg"
+              alt="카카오페이 후원 QR"
+              style={{
+                width: '160px', height: '160px', borderRadius: '12px',
+                border: '1px solid rgba(30,39,56,0.8)',
+              }}
+            />
+            <p style={{ marginTop: '0.6rem', fontSize: '0.78rem', color: '#475569' }}>
+              PC에서는 QR 스캔 · 모바일에서는 버튼 클릭
+            </p>
+          </div>
+
           <a
             href="https://qr.kakaopay.com/Ej8Pxzlhy"
             target="_blank"
@@ -339,7 +354,7 @@ export default function Home() {
               (e.currentTarget as HTMLElement).style.borderColor = 'rgba(167,139,250,0.35)';
             }}
           >
-            🤍 후원하기
+            🤍 카카오페이로 후원하기
           </a>
 
           <p style={{ marginTop: '1rem', fontSize: '0.78rem', color: '#334155' }}>
