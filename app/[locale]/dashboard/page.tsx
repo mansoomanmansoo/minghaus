@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslations, useLocale } from 'next-intl';
 
 interface PersonaCard {
   id: string;
@@ -16,6 +17,8 @@ interface PersonaCard {
 
 export default function DashboardPage() {
   const router = useRouter();
+  const t = useTranslations('dashboard');
+  const locale = useLocale();
   const [personas, setPersonas] = useState<PersonaCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [userEmail, setUserEmail] = useState('');
@@ -48,7 +51,7 @@ export default function DashboardPage() {
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`"${name}"와의 모든 대화 기록이 삭제됩니다. 계속할까요?`)) return;
+    if (!confirm(t('delete_confirm', { name }))) return;
     setDeletingId(id);
     await fetch(`/api/personas/${id}`, { method: 'DELETE' });
     setPersonas(prev => prev.filter(p => p.id !== id));
@@ -57,6 +60,15 @@ export default function DashboardPage() {
 
   const relationEmoji: Record<string, string> = {
     '연인': '💌', '친구': '🌸', '가족': '🕯', '직장동료': '💼', '기타': '💭',
+    'romantic': '💌', 'friend': '🌸', 'family': '🕯', 'colleague': '💼', 'other': '💭',
+  };
+
+  const relationLabel = (rel: string) => {
+    const map: Record<string, string> = {
+      '연인': t('relation_romantic'), '친구': t('relation_friend'), '가족': t('relation_family'),
+      '직장동료': t('relation_colleague'), '기타': t('relation_other'),
+    };
+    return map[rel] ?? rel;
   };
 
   return (
@@ -93,7 +105,7 @@ export default function DashboardPage() {
               cursor: 'pointer',
             }}
           >
-            로그아웃
+            {t('logout')}
           </button>
         </div>
       </header>
@@ -103,10 +115,10 @@ export default function DashboardPage() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem' }}>
           <div>
             <h1 style={{ fontSize: '1.6rem', fontWeight: 700, marginBottom: '0.35rem' }}>
-              나의 대화 상대들
+              {t('title')}
             </h1>
             <p style={{ color: '#475569', fontSize: '0.9rem' }}>
-              그리운 사람들과의 기억을 이어가세요
+              {t('subtitle')}
             </p>
           </div>
           <Link
@@ -123,14 +135,14 @@ export default function DashboardPage() {
               whiteSpace: 'nowrap',
             }}
           >
-            + 새로 추가
+            {t('add_btn')}
           </Link>
         </div>
 
         {loading ? (
           <div style={{ textAlign: 'center', padding: '4rem', color: '#475569' }}>
             <motion.div animate={{ opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1.5 }}>
-              불러오는 중...
+              {t('loading')}
             </motion.div>
           </div>
         ) : personas.length === 0 ? (
@@ -147,10 +159,12 @@ export default function DashboardPage() {
           >
             <div style={{ fontSize: '3rem', marginBottom: '1.25rem' }}>💭</div>
             <h2 style={{ fontSize: '1.2rem', fontWeight: 600, marginBottom: '0.75rem', color: '#94a3b8' }}>
-              아직 대화 상대가 없어요
+              {t('empty_title')}
             </h2>
             <p style={{ color: '#475569', fontSize: '0.9rem', marginBottom: '1.5rem', lineHeight: 1.7 }}>
-              카카오톡 대화를 업로드하면 그 사람과<br />다시 이야기할 수 있어요
+              {t('empty_desc').split('\n').map((line, i, arr) => (
+                <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
+              ))}
             </p>
             <Link
               href="/upload"
@@ -164,7 +178,7 @@ export default function DashboardPage() {
                 textDecoration: 'none',
               }}
             >
-              첫 대화 시작하기 →
+              {t('empty_cta')}
             </Link>
           </motion.div>
         ) : (
@@ -211,8 +225,8 @@ export default function DashboardPage() {
                         {p.personName}
                       </p>
                       <p style={{ color: '#64748b', fontSize: '0.78rem' }}>
-                        {relationEmoji[p.userInfo.relation] ?? '💭'} {p.userInfo.relation}
-                        {p.userInfo.name ? ` · 나 = ${p.userInfo.name}` : ''}
+                        {relationEmoji[p.userInfo.relation] ?? '💭'} {relationLabel(p.userInfo.relation)}
+                        {p.userInfo.name ? ` · ${t('me_label', { name: p.userInfo.name })}` : ''}
                       </p>
                     </div>
                   </div>
@@ -220,15 +234,15 @@ export default function DashboardPage() {
                   {/* Stats */}
                   <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.25rem' }}>
                     <div>
-                      <p style={{ fontSize: '0.75rem', color: '#475569', marginBottom: '0.1rem' }}>전체 대화</p>
+                      <p style={{ fontSize: '0.75rem', color: '#475569', marginBottom: '0.1rem' }}>{t('card_total')}</p>
                       <p style={{ fontSize: '0.9rem', fontWeight: 600, color: '#94a3b8' }}>
-                        {p.messageCount.toLocaleString()}개
+                        {p.messageCount.toLocaleString()}
                       </p>
                     </div>
                     <div>
-                      <p style={{ fontSize: '0.75rem', color: '#475569', marginBottom: '0.1rem' }}>등록일</p>
+                      <p style={{ fontSize: '0.75rem', color: '#475569', marginBottom: '0.1rem' }}>{t('card_date')}</p>
                       <p style={{ fontSize: '0.9rem', fontWeight: 600, color: '#94a3b8' }}>
-                        {new Date(p.createdAt).toLocaleDateString('ko-KR')}
+                        {new Date(p.createdAt).toLocaleDateString(locale)}
                       </p>
                     </div>
                   </div>
@@ -251,7 +265,7 @@ export default function DashboardPage() {
                         transition: 'all 0.2s',
                       }}
                     >
-                      대화하기
+                      {t('card_chat')}
                     </Link>
                     <button
                       onClick={() => handleDelete(p.id, p.personName)}
@@ -267,7 +281,7 @@ export default function DashboardPage() {
                         transition: 'all 0.2s',
                       }}
                     >
-                      {deletingId === p.id ? '...' : '삭제'}
+                      {deletingId === p.id ? '...' : t('card_delete')}
                     </button>
                   </div>
                 </motion.div>

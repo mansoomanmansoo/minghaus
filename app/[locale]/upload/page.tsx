@@ -4,24 +4,10 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 
 type Step = 'name' | 'about-me' | 'source' | 'upload' | 'text-input' | 'processing';
 type PlatformId = 'kakao' | 'whatsapp' | 'line' | 'text';
-
-interface PlatformInfo {
-  id: PlatformId;
-  label: string;
-  icon: string;
-  desc: string;
-  color: string;
-}
-
-const PLATFORMS: PlatformInfo[] = [
-  { id: 'kakao',    label: '카카오톡',  icon: '💬', desc: '.txt / .csv 내보내기',        color: '#f9e200' },
-  { id: 'whatsapp', label: 'WhatsApp', icon: '🟢', desc: '.txt 채팅 내보내기',           color: '#25d366' },
-  { id: 'line',     label: 'Line',     icon: '🟩', desc: '.txt 대화 내보내기',           color: '#06c755' },
-  { id: 'text',     label: '직접 입력', icon: '✏️', desc: '파일 없이 말투·추억 직접 묘사', color: '#a78bfa' },
-];
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
@@ -55,6 +41,22 @@ const GUIDE: Record<Exclude<PlatformId, 'text'>, { ios: string[]; android?: stri
 
 export default function UploadPage() {
   const router = useRouter();
+  const t = useTranslations('upload');
+
+  const PLATFORMS = [
+    { id: 'kakao' as PlatformId,    label: t('platform_kakao'),    icon: '💬', desc: t('platform_kakao_desc'),    color: '#f9e200' },
+    { id: 'whatsapp' as PlatformId, label: t('platform_whatsapp'), icon: '🟢', desc: t('platform_whatsapp_desc'), color: '#25d366' },
+    { id: 'line' as PlatformId,     label: t('platform_line'),     icon: '🟩', desc: t('platform_line_desc'),     color: '#06c755' },
+    { id: 'text' as PlatformId,     label: t('platform_text'),     icon: '✏️', desc: t('platform_text_desc'),     color: '#a78bfa' },
+  ];
+
+  const RELATIONS = [
+    { value: '연인', label: t('relation_romantic') },
+    { value: '친구', label: t('relation_friend') },
+    { value: '가족', label: t('relation_family') },
+    { value: '직장동료', label: t('relation_colleague') },
+    { value: '기타', label: t('relation_other') },
+  ];
   const [step, setStep]               = useState<Step>('name');
   const [platform, setPlatform]       = useState<PlatformId>('kakao');
   const [personName, setPersonName]   = useState('');
@@ -270,14 +272,14 @@ export default function UploadPage() {
             <div style={{ marginBottom: '1rem' }}>
               <label style={{ display: 'block', color: '#94a3b8', fontSize: '0.82rem', marginBottom: '0.4rem' }}>관계 *</label>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                {['연인', '친구', '가족', '직장동료', '기타'].map(r => (
-                  <button key={r} onClick={() => setRelation(r)} style={{
+                {RELATIONS.map(r => (
+                  <button key={r.value} onClick={() => setRelation(r.value)} style={{
                     padding: '0.45rem 1rem', borderRadius: '9999px',
-                    border: `1px solid ${relation === r ? '#a78bfa' : 'rgba(30,39,56,0.9)'}`,
-                    background: relation === r ? 'rgba(167,139,250,0.15)' : 'transparent',
-                    color: relation === r ? '#c4b5fd' : '#64748b',
+                    border: `1px solid ${relation === r.value ? '#a78bfa' : 'rgba(30,39,56,0.9)'}`,
+                    background: relation === r.value ? 'rgba(167,139,250,0.15)' : 'transparent',
+                    color: relation === r.value ? '#c4b5fd' : '#64748b',
                     fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.2s',
-                  }}>{r}</button>
+                  }}>{r.label}</button>
                 ))}
               </div>
             </div>

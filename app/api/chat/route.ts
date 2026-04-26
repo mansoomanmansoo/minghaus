@@ -14,6 +14,8 @@ interface ChatMessage {
   content: string;
 }
 
+type MsgShape = { ai_prompt: Record<string, string> };
+
 export async function POST(req: NextRequest) {
   const user = await getSessionUser();
   if (!user) return new Response(JSON.stringify({ error: '로그인이 필요합니다.' }), { status: 401 });
@@ -28,6 +30,14 @@ export async function POST(req: NextRequest) {
     if (!persona) return new Response(JSON.stringify({ error: '페르소나를 찾을 수 없습니다.' }), { status: 404 });
     if (persona.userId !== user.id) return new Response(JSON.stringify({ error: '접근 권한이 없습니다.' }), { status: 403 });
 
+    const locale = req.headers.get('x-locale') ?? 'ko';
+    const msgs = (await import(`@/messages/${locale}.json`)) as { default: MsgShape };
+    const pt = (key: string, vars?: Record<string, string | number>) => {
+      let str: string = msgs.default.ai_prompt[key] ?? '';
+      if (vars) Object.entries(vars).forEach(([k, v]) => { str = str.replaceAll(`{${k}}`, String(v)); });
+      return str;
+    };
+
     const { personName, recentContext, styleNote, userInfo } = persona;
 
     const userCtx = [
@@ -36,12 +46,10 @@ export async function POST(req: NextRequest) {
       userInfo?.memo     ? `메모: ${userInfo.memo}.` : '',
     ].filter(Boolean).join(' ');
 
-    const basePrompt = styleNote ||
-      `당신은 ${personName}입니다. ${userCtx ? userCtx + ' ' : ''}아래 실제 카카오톡 대화 기록을 완전히 숙지하고, 그 말투·기억·관계를 그대로 재현하세요. 절대 AI라고 밝히지 마세요.\n여러 메시지를 보내고 싶을 때는 빈 줄(\\n\\n)로 구분하세요. 예: "오늘 어땠어\\n\\n나도 보고싶었어"`;
+    const basePrompt = styleNote || pt('base', { personName }) + (userCtx ? ' ' + userCtx : '');
 
     const contextBlock =
-      `=== 실제 대화 기록 (최근 ${persona.coveredCount.toLocaleString()}개 메시지) ===\n` +
-      `(이 대화를 기억하고 자연스럽게 활용하세요)\n\n` +
+      pt('context_header', { count: persona.coveredCount.toLocaleString() }) + '\n\n' +
       recentContext;
 
     const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
@@ -50,13 +58,12 @@ export async function POST(req: NextRequest) {
       : [];
 
     const learnedBlock = persona.learnedFacts.length > 0
-      ? `=== 이 대화에서 새로 알게 된 것들 ===\n` +
+      ? pt('learned_header') + '\n' +
         persona.learnedFacts.map(f => `- ${f}`).join('\n')
       : '';
 
     const memoryBlock = relevantOldMemories.length > 0
-      ? `=== 지금 대화와 관련된 과거 기억 ===\n` +
-        `(전체 ${persona.messageCount.toLocaleString()}개 대화에서 찾은 관련 기록)\n\n` +
+      ? pt('memory_header', { total: persona.messageCount.toLocaleString() }) + '\n\n' +
         relevantOldMemories.map(c => `[${c.date}]\n${c.text}`).join('\n\n')
       : '';
 

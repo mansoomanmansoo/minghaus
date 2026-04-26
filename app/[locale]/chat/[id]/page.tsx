@@ -4,6 +4,8 @@ import { useState, useEffect, useRef, useCallback, use } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
+import { useTranslations, useLocale } from 'next-intl';
+import LocaleSwitcher from '@/components/LocaleSwitcher';
 
 const ParticleField = dynamic(() => import('@/components/ParticleField'), { ssr: false });
 
@@ -40,6 +42,8 @@ interface PersonaInfo {
 
 export default function ChatPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const t = useTranslations('chat');
+  const locale = useLocale();
 
   const [personaInfo, setPersonaInfo] = useState<PersonaInfo | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -125,8 +129,8 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
       if (controller.signal.aborted) return;
 
       const greetingTrigger = info.myName
-        ? `안녕, 나 ${info.myName}야.`
-        : '안녕, 나야.';
+        ? t('greeting_trigger', { myName: info.myName })
+        : t('greeting_trigger_anon');
 
       const seedUserMsg: Message = {
         role: 'user',
@@ -138,7 +142,7 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
       try {
         const greetRes = await fetch('/api/chat', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'x-locale': locale },
           body: JSON.stringify({
             personaId: id,
             messages: [{ role: 'user', content: greetingTrigger }],
@@ -153,7 +157,7 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
             window.location.href = '/auth';
             return;
           }
-          showToast(`연결 실패 (${greetRes.status}): ${errBody.error ?? '알 수 없는 오류'}`, 8000);
+          showToast(`${t('conn_failed')} (${greetRes.status}): ${errBody.error ?? ''}`, 8000);
           setGreetingFailed(true);
           setIsInitializing(false);
           return;
@@ -241,7 +245,7 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-locale': locale },
         body: JSON.stringify({ personaId: id, messages: apiMessages }),
         signal: controller.signal,
       });
@@ -301,7 +305,7 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
               { role: 'assistant', content: assistantText },
             ],
           }),
-        }).catch(() => { showToast('메시지 저장에 실패했습니다. 대화는 이 세션에서만 유지됩니다.'); });
+        }).catch(() => { showToast(t('err_save')); });
       }
     } catch (err) {
       if ((err as Error).name === 'AbortError') return;
@@ -329,7 +333,7 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
     }
   };
 
-  const personName = personaInfo?.personName ?? '그 사람';
+  const personName = personaInfo?.personName ?? '...';
   const initial = personName.charAt(0);
   const bubbleMaxWidth = isMobile ? '85%' : '65%';
 
@@ -402,13 +406,13 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
 
           <p style={{ textAlign: 'center', color: '#475569', fontSize: '0.78rem', marginBottom: '1.25rem' }}>
             {personaInfo?.createdAt
-              ? new Date(personaInfo.createdAt).toLocaleDateString('ko-KR')
-              : new Date().toLocaleDateString('ko-KR')}
+              ? new Date(personaInfo.createdAt).toLocaleDateString(locale)
+              : new Date().toLocaleDateString(locale)}
           </p>
 
           {personaInfo && (
             <p style={{ textAlign: 'center', color: '#64748b', fontSize: '0.78rem', marginBottom: '1.5rem' }}>
-              대화 기록 {personaInfo.messageCount.toLocaleString()}개
+              {personaInfo.messageCount.toLocaleString()}
             </p>
           )}
 
@@ -417,7 +421,7 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
               fontSize: '0.72rem', color: '#334155', lineHeight: 1.6,
               padding: '0.75rem', background: 'rgba(30,39,56,0.3)', borderRadius: '8px',
             }}>
-              이 대화는 AI가 생성합니다. 실제 인물의 응답이 아닙니다.
+              {t('disclaimer')}
             </p>
           </div>
 
@@ -427,7 +431,7 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
             border: '1px solid rgba(167,139,250,0.3)', borderRadius: '8px',
             color: '#a78bfa', textDecoration: 'none', fontSize: '0.82rem', fontWeight: 500,
           }}>
-            + 새 대화
+            {t('new_chat')}
           </Link>
 
           <Link href="/dashboard" style={{
@@ -436,8 +440,12 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
             border: '1px solid rgba(30,39,56,0.6)', borderRadius: '8px',
             color: '#64748b', textDecoration: 'none', fontSize: '0.82rem',
           }}>
-            대화 목록
+            {t('chat_list')}
           </Link>
+
+          <div style={{ marginTop: '0.75rem', display: 'flex', justifyContent: 'center' }}>
+            <LocaleSwitcher />
+          </div>
         </aside>
       )}
 
@@ -489,7 +497,7 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
               border: '1px solid rgba(167,139,250,0.3)',
               borderRadius: '9999px', color: '#a78bfa', flexShrink: 0,
             }}>
-              AI
+              {t('ai_badge_mobile')}
             </span>
           </div>
         ) : (
@@ -508,7 +516,7 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
               border: '1px solid rgba(167,139,250,0.3)',
               borderRadius: '9999px', color: '#a78bfa',
             }}>
-              AI 페르소나
+              {t('ai_badge')}
             </span>
           </div>
         )}
@@ -523,7 +531,7 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
           {isInitializing && (
             <div style={{ textAlign: 'center', color: '#475569', marginTop: '3rem' }}>
               <motion.div animate={{ opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1.5 }} style={{ fontSize: '0.9rem' }}>
-                연결 중...
+                {t('connecting')}
               </motion.div>
             </div>
           )}
@@ -531,7 +539,7 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
           {greetingFailed && !isInitializing && messages.length === 0 && (
             <div style={{ textAlign: 'center', marginTop: '4rem' }}>
               <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '1.25rem' }}>
-                연결에 실패했습니다.
+                {t('conn_failed')}
               </p>
               <button
                 onClick={() => setRetryCount(c => c + 1)}
@@ -543,7 +551,7 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
                   boxShadow: '0 0 12px rgba(167,139,250,0.2)',
                 }}
               >
-                다시 시도
+                {t('retry')}
               </button>
             </div>
           )}
@@ -582,7 +590,7 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
                         </div>
                         {bIdx === bubbles.length - 1 && (
                           <span style={{ fontSize: '0.7rem', color: '#f4a261', opacity: 0.7, paddingLeft: '0.25rem' }}>
-                            {msg.timestamp.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                            {msg.timestamp.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}
                           </span>
                         )}
                       </motion.div>
@@ -608,7 +616,7 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
                       {msg.content}
                     </div>
                     <span style={{ fontSize: '0.7rem', color: '#475569', opacity: 0.7, paddingRight: '0.25rem' }}>
-                      {msg.timestamp.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                      {msg.timestamp.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </motion.div>
                 )];
@@ -631,7 +639,7 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
             value={inputValue}
             onChange={e => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={`${personName}에게 말을 건네보세요...`}
+            placeholder={t('placeholder', { name: personName })}
             rows={1}
             style={{
               flex: 1, padding: '0.75rem 1rem',
@@ -667,7 +675,7 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}
           >
-            {isLoading ? '...' : (isMobile ? '↑' : '전송')}
+            {isLoading ? '...' : (isMobile ? '↑' : t('send'))}
           </button>
         </div>
       </div>

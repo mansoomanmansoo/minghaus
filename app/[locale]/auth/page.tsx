@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Suspense } from 'react';
+import { useTranslations } from 'next-intl';
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
@@ -23,6 +24,7 @@ function AuthForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const nextPath = searchParams.get('next') || '/dashboard';
+  const t = useTranslations('auth');
 
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [email, setEmail] = useState('');
@@ -33,8 +35,8 @@ function AuthForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) { setError('이메일과 비밀번호를 입력해주세요.'); return; }
-    if (password.length < 6) { setError('비밀번호는 최소 6자 이상이어야 합니다.'); return; }
+    if (!email || !password) { setError(t('err_empty')); return; }
+    if (password.length < 6) { setError(t('err_short_pw')); return; }
 
     setLoading(true);
     setError('');
@@ -50,18 +52,18 @@ function AuthForm() {
       const data = await res.json() as { ok?: boolean; error?: string; needsVerification?: boolean };
 
       if (!res.ok) {
-        setError(data.error || '오류가 발생했습니다.');
+        setError(data.error || t('err_generic'));
         return;
       }
 
       if (data.needsVerification) {
-        setSuccess('이메일을 확인해주세요. 인증 링크를 보내드렸습니다.');
+        setSuccess(t('verify_email'));
         return;
       }
 
       router.push(nextPath);
     } catch {
-      setError('서버 오류가 발생했습니다.');
+      setError(t('err_generic'));
     } finally {
       setLoading(false);
     }
@@ -113,24 +115,24 @@ function AuthForm() {
           }}
         >
           <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>
-            {mode === 'signin' ? '다시 만나요' : '처음이신가요?'}
+            {mode === 'signin' ? t('signin') : t('signup')}
           </h1>
           <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '2rem', lineHeight: 1.6 }}>
             {mode === 'signin'
-              ? '이메일과 비밀번호로 로그인하세요'
-              : '이메일로 계정을 만들고 그리운 사람을 만나세요'}
+              ? t('email_placeholder')
+              : t('password_placeholder')}
           </p>
 
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div>
               <label style={{ display: 'block', color: '#94a3b8', fontSize: '0.82rem', marginBottom: '0.4rem' }}>
-                이메일
+                {t('email')}
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                placeholder="your@email.com"
+                placeholder={t('email_placeholder')}
                 style={inputStyle}
                 onFocus={e => { e.target.style.borderColor = '#a78bfa'; e.target.style.boxShadow = '0 0 0 3px rgba(167,139,250,0.15)'; }}
                 onBlur={e => { e.target.style.borderColor = 'rgba(30,39,56,0.9)'; e.target.style.boxShadow = 'none'; }}
@@ -140,13 +142,13 @@ function AuthForm() {
 
             <div>
               <label style={{ display: 'block', color: '#94a3b8', fontSize: '0.82rem', marginBottom: '0.4rem' }}>
-                비밀번호
+                {t('password')}
               </label>
               <input
                 type="password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                placeholder="6자 이상"
+                placeholder={t('password_placeholder')}
                 style={inputStyle}
                 onFocus={e => { e.target.style.borderColor = '#a78bfa'; e.target.style.boxShadow = '0 0 0 3px rgba(167,139,250,0.15)'; }}
                 onBlur={e => { e.target.style.borderColor = 'rgba(30,39,56,0.9)'; e.target.style.boxShadow = 'none'; }}
@@ -177,7 +179,7 @@ function AuthForm() {
                 marginTop: '0.25rem',
               }}
             >
-              {loading ? '처리 중...' : mode === 'signin' ? '로그인' : '계정 만들기'}
+              {loading ? '...' : mode === 'signin' ? t('submit_signin') : t('submit_signup')}
             </button>
           </form>
 
@@ -193,7 +195,7 @@ function AuthForm() {
                 textDecoration: 'underline',
               }}
             >
-              {mode === 'signin' ? '계정이 없으신가요? 회원가입' : '이미 계정이 있으신가요? 로그인'}
+              {mode === 'signin' ? t('switch_to_signup') : t('switch_to_signin')}
             </button>
           </div>
         </motion.div>
