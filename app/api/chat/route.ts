@@ -66,6 +66,7 @@ export async function POST(req: NextRequest) {
     const stream = client.beta.messages.stream({
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 4096,
+      betas: ['prompt-caching-2024-07-31'],
       system: systemBlocks,
       messages: recentMessages.map(m => ({ role: m.role, content: m.content })),
     });
@@ -94,7 +95,8 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (err) {
-    console.error('chat error:', err);
-    return new Response(JSON.stringify({ error: '응답 생성 중 오류가 발생했습니다.' }), { status: 500 });
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error('chat error:', msg, err);
+    return new Response(JSON.stringify({ error: msg }), { status: 500 });
   }
 }
