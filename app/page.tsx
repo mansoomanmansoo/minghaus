@@ -325,6 +325,7 @@ export default function Home() {
               style={{
                 width: '160px', height: '160px', borderRadius: '12px',
                 border: '1px solid rgba(30,39,56,0.8)',
+                display: 'block', margin: '0 auto',
               }}
             />
             <p style={{ marginTop: '0.6rem', fontSize: '0.78rem', color: '#475569' }}>
