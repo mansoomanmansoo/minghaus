@@ -146,6 +146,9 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
         });
 
         if (!greetRes.ok) {
+          const errBody = await greetRes.json().catch(() => ({})) as { error?: string };
+          console.error('greeting failed:', greetRes.status, errBody.error);
+          showToast(`연결 실패 (${greetRes.status}): ${errBody.error ?? '알 수 없는 오류'}`);
           setGreetingFailed(true);
           setIsInitializing(false);
           return;
@@ -235,7 +238,10 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
         signal: controller.signal,
       });
 
-      if (!res.ok) throw new Error('응답 실패');
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({})) as { error?: string };
+        throw new Error(errBody.error ?? `HTTP ${res.status}`);
+      }
 
       const reader = res.body?.getReader();
       if (!reader) return;
@@ -288,11 +294,13 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
       }
     } catch (err) {
       if ((err as Error).name === 'AbortError') return;
+      const errMsg = err instanceof Error ? err.message : '알 수 없는 오류';
+      console.error('sendMessage error:', errMsg);
       setMessages(prev => {
         const updated = [...prev];
         updated[updated.length - 1] = {
           role: 'assistant',
-          content: '응답을 받지 못했습니다. 잠시 후 다시 시도해주세요.',
+          content: `오류: ${errMsg}`,
           timestamp: new Date(),
         };
         return updated;
