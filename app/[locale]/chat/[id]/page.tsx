@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
 import { useTranslations, useLocale } from 'next-intl';
 import LocaleSwitcher from '@/components/LocaleSwitcher';
+import ShareCard from '@/components/ShareCard';
 
 const ParticleField = dynamic(() => import('@/components/ParticleField'), { ssr: false });
 
@@ -56,6 +57,7 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
   const [toast, setToast] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [toastDuration, setToastDuration] = useState(3500);
+  const [showShare, setShowShare] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -499,6 +501,21 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
             }}>
               {t('ai_badge_mobile')}
             </span>
+            {messages.filter(m => !m.hidden).length >= 2 && (
+              <button
+                onClick={() => setShowShare(true)}
+                title="대화 공유"
+                style={{
+                  background: 'rgba(167,139,250,0.12)',
+                  border: '1px solid rgba(167,139,250,0.25)',
+                  borderRadius: '8px', color: '#a78bfa',
+                  padding: '0.3rem 0.55rem', cursor: 'pointer',
+                  fontSize: '1rem', flexShrink: 0, lineHeight: 1,
+                }}
+              >
+                ↗
+              </button>
+            )}
           </div>
         ) : (
           /* ── Desktop top bar ── */
@@ -518,6 +535,23 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
             }}>
               {t('ai_badge')}
             </span>
+            {messages.filter(m => !m.hidden).length >= 2 && (
+              <button
+                onClick={() => setShowShare(true)}
+                title="대화 공유"
+                style={{
+                  marginLeft: 'auto',
+                  background: 'rgba(167,139,250,0.1)',
+                  border: '1px solid rgba(167,139,250,0.25)',
+                  borderRadius: '8px', color: '#a78bfa',
+                  padding: '0.35rem 0.75rem', cursor: 'pointer',
+                  fontSize: '0.82rem', fontWeight: 500, display: 'flex',
+                  alignItems: 'center', gap: '0.3rem',
+                }}
+              >
+                ↗ 공유
+              </button>
+            )}
           </div>
         )}
 
@@ -679,6 +713,14 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
           </button>
         </div>
       </div>
+
+      {showShare && personaInfo && (
+        <ShareCard
+          personName={personaInfo.personName}
+          messages={messages.filter(m => !m.hidden)}
+          onClose={() => setShowShare(false)}
+        />
+      )}
     </div>
   );
 }
