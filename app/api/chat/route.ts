@@ -28,10 +28,16 @@ export async function POST(req: NextRequest) {
     if (!persona) return new Response(JSON.stringify({ error: '페르소나를 찾을 수 없습니다.' }), { status: 404 });
     if (persona.userId !== user.id) return new Response(JSON.stringify({ error: '접근 권한이 없습니다.' }), { status: 403 });
 
-    const { personName, recentContext, styleNote } = persona;
+    const { personName, recentContext, styleNote, userInfo } = persona;
+
+    const userCtx = [
+      userInfo?.name     ? `지금 대화하는 상대는 ${userInfo.name}입니다.` : '',
+      userInfo?.relation ? `관계: ${userInfo.relation}.` : '',
+      userInfo?.memo     ? `메모: ${userInfo.memo}.` : '',
+    ].filter(Boolean).join(' ');
 
     const basePrompt = styleNote ||
-      `당신은 ${personName}입니다. 아래 실제 카카오톡 대화 기록을 완전히 숙지하고, 그 말투·기억·관계를 그대로 재현하세요. 절대 AI라고 밝히지 마세요.\n여러 메시지를 보내고 싶을 때는 빈 줄(\\n\\n)로 구분하세요. 예: "오늘 어땠어\\n\\n나도 보고싶었어"`;
+      `당신은 ${personName}입니다. ${userCtx ? userCtx + ' ' : ''}아래 실제 카카오톡 대화 기록을 완전히 숙지하고, 그 말투·기억·관계를 그대로 재현하세요. 절대 AI라고 밝히지 마세요.\n여러 메시지를 보내고 싶을 때는 빈 줄(\\n\\n)로 구분하세요. 예: "오늘 어땠어\\n\\n나도 보고싶었어"`;
 
     const contextBlock =
       `=== 실제 대화 기록 (최근 ${persona.coveredCount.toLocaleString()}개 메시지) ===\n` +
@@ -54,11 +60,17 @@ export async function POST(req: NextRequest) {
         relevantOldMemories.map(c => `[${c.date}]\n${c.text}`).join('\n\n')
       : '';
 
+    // styleNote가 있어도 관계/메모는 항상 별도 블록으로 포함 (매 대화 참고)
+    const userContextBlock = userCtx
+      ? `=== 대화 상대 정보 ===\n${userCtx}\n이 정보를 대화 전반에 걸쳐 자연스럽게 반영하세요.`
+      : '';
+
     const systemBlocks: TextBlockParam[] = [
       { type: 'text', text: basePrompt, cache_control: { type: 'ephemeral' } },
       { type: 'text', text: contextBlock, cache_control: { type: 'ephemeral' } },
-      ...(learnedBlock ? [{ type: 'text' as const, text: learnedBlock }] : []),
-      ...(memoryBlock   ? [{ type: 'text' as const, text: memoryBlock  }] : []),
+      ...(userContextBlock ? [{ type: 'text' as const, text: userContextBlock }] : []),
+      ...(learnedBlock     ? [{ type: 'text' as const, text: learnedBlock }]     : []),
+      ...(memoryBlock      ? [{ type: 'text' as const, text: memoryBlock  }]     : []),
     ];
 
     const recentMessages = messages.slice(-HISTORY_WINDOW);

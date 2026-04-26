@@ -284,9 +284,12 @@ export default function UploadPage() {
 
             <div style={{ marginBottom: '1.5rem' }}>
               <label style={{ display: 'block', color: '#94a3b8', fontSize: '0.82rem', marginBottom: '0.4rem' }}>
-                한 줄 메모 <span style={{ color: '#475569' }}>(선택)</span>
+                한 줄 메모
+                <span style={{ color: '#a78bfa', fontSize: '0.75rem', marginLeft: '0.4rem' }}>
+                  입력할수록 훨씬 자연스러운 대화가 가능해요
+                </span>
               </label>
-              <input type="text" placeholder="예: 3년 사귀었어, 고등학교 친구" value={memo} onChange={e => setMemo(e.target.value)}
+              <input type="text" placeholder="예: 3년 사귀었어, 고등학교 친구, 항상 먼저 연락하는 스타일" value={memo} onChange={e => setMemo(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleAboutMeSubmit()}
                 onFocus={e => { e.target.style.borderColor = '#a78bfa'; e.target.style.boxShadow = '0 0 0 3px rgba(167,139,250,0.15)'; }}
                 onBlur={e => { e.target.style.borderColor = 'rgba(30,39,56,0.9)'; e.target.style.boxShadow = 'none'; }}
