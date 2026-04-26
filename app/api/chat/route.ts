@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
-import type { BetaTextBlockParam } from '@anthropic-ai/sdk/resources/beta/messages/messages';
+import type { TextBlockParam } from '@anthropic-ai/sdk/resources/messages/messages';
 import { getPersona } from '@/lib/store';
 import { searchVectorsByPersonaId } from '@/lib/embeddings';
 import { getSessionUser } from '@/lib/auth';
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
         relevantOldMemories.map(c => `[${c.date}]\n${c.text}`).join('\n\n')
       : '';
 
-    const systemBlocks: BetaTextBlockParam[] = [
+    const systemBlocks: TextBlockParam[] = [
       { type: 'text', text: basePrompt, cache_control: { type: 'ephemeral' } },
       { type: 'text', text: contextBlock, cache_control: { type: 'ephemeral' } },
       ...(learnedBlock ? [{ type: 'text' as const, text: learnedBlock }] : []),
@@ -63,10 +63,9 @@ export async function POST(req: NextRequest) {
 
     const recentMessages = messages.slice(-HISTORY_WINDOW);
 
-    const stream = client.beta.messages.stream({
+    const stream = client.messages.stream({
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 4096,
-      betas: ['prompt-caching-2024-07-31'],
       system: systemBlocks,
       messages: recentMessages.map(m => ({ role: m.role, content: m.content })),
     });
