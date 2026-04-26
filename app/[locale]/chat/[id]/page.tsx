@@ -7,6 +7,7 @@ import dynamic from 'next/dynamic';
 import { useTranslations, useLocale } from 'next-intl';
 import LocaleSwitcher from '@/components/LocaleSwitcher';
 import ShareCard from '@/components/ShareCard';
+import LetterView from '@/components/LetterView';
 
 const ParticleField = dynamic(() => import('@/components/ParticleField'), { ssr: false });
 
@@ -58,6 +59,7 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
   const [isMobile, setIsMobile] = useState(false);
   const [toastDuration, setToastDuration] = useState(3500);
   const [showShare, setShowShare] = useState(false);
+  const [showLetter, setShowLetter] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -427,8 +429,22 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
             </p>
           </div>
 
+          <button
+            onClick={() => setShowLetter(true)}
+            style={{
+              marginTop: '1rem', width: '100%',
+              padding: '0.65rem',
+              background: 'linear-gradient(135deg, rgba(124,58,237,0.2), rgba(167,139,250,0.1))',
+              border: '1px solid rgba(167,139,250,0.4)', borderRadius: '8px',
+              color: '#c4b5fd', fontSize: '0.82rem', fontWeight: 600,
+              cursor: 'pointer', textAlign: 'center',
+            }}
+          >
+            ✉️ 편지 받기
+          </button>
+
           <Link href="/upload" style={{
-            marginTop: '1rem', display: 'block', textAlign: 'center',
+            marginTop: '0.5rem', display: 'block', textAlign: 'center',
             padding: '0.65rem',
             border: '1px solid rgba(167,139,250,0.3)', borderRadius: '8px',
             color: '#a78bfa', textDecoration: 'none', fontSize: '0.82rem', fontWeight: 500,
@@ -501,6 +517,19 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
             }}>
               {t('ai_badge_mobile')}
             </span>
+            <button
+              onClick={() => setShowLetter(true)}
+              title="편지 받기"
+              style={{
+                background: 'linear-gradient(135deg, rgba(124,58,237,0.25), rgba(167,139,250,0.15))',
+                border: '1px solid rgba(167,139,250,0.35)',
+                borderRadius: '8px', color: '#c4b5fd',
+                padding: '0.3rem 0.55rem', cursor: 'pointer',
+                fontSize: '0.9rem', flexShrink: 0, lineHeight: 1,
+              }}
+            >
+              ✉️
+            </button>
             {messages.filter(m => !m.hidden).length >= 2 && (
               <button
                 onClick={() => setShowShare(true)}
@@ -721,6 +750,16 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
           onClose={() => setShowShare(false)}
         />
       )}
+
+      <AnimatePresence>
+        {showLetter && personaInfo && (
+          <LetterView
+            personaId={id}
+            personName={personaInfo.personName}
+            onClose={() => setShowLetter(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
