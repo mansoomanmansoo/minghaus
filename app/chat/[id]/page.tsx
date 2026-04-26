@@ -51,6 +51,7 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [toastDuration, setToastDuration] = useState(3500);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -67,9 +68,9 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
 
   useEffect(() => {
     if (!toast) return;
-    const t = setTimeout(() => setToast(null), 3500);
+    const t = setTimeout(() => setToast(null), toastDuration);
     return () => clearTimeout(t);
-  }, [toast]);
+  }, [toast, toastDuration]);
 
   useEffect(() => {
     return () => { abortRef.current?.abort(); };
@@ -148,7 +149,11 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
         if (!greetRes.ok) {
           const errBody = await greetRes.json().catch(() => ({})) as { error?: string };
           console.error('greeting failed:', greetRes.status, errBody.error);
-          showToast(`연결 실패 (${greetRes.status}): ${errBody.error ?? '알 수 없는 오류'}`);
+          if (greetRes.status === 401) {
+            window.location.href = '/auth';
+            return;
+          }
+          showToast(`연결 실패 (${greetRes.status}): ${errBody.error ?? '알 수 없는 오류'}`, 8000);
           setGreetingFailed(true);
           setIsInitializing(false);
           return;
@@ -198,7 +203,10 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
     return () => { controller.abort(); };
   }, [id, retryCount]);
 
-  const showToast = useCallback((msg: string) => setToast(msg), []);
+  const showToast = useCallback((msg: string, duration = 3500) => {
+    setToastDuration(duration);
+    setToast(msg);
+  }, []);
 
   const learnFromConversation = (msgs: Message[]) => {
     const visible = msgs.filter(m => !m.hidden);
@@ -239,6 +247,7 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
       });
 
       if (!res.ok) {
+        if (res.status === 401) { window.location.href = '/auth'; return; }
         const errBody = await res.json().catch(() => ({})) as { error?: string };
         throw new Error(errBody.error ?? `HTTP ${res.status}`);
       }
@@ -280,6 +289,8 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
       }
 
       if (assistantText && !controller.signal.aborted) {
+        const finalMessages = [...newMessages, { role: 'assistant' as const, content: assistantText, timestamp: new Date() }];
+        learnFromConversation(finalMessages);
         fetch('/api/messages', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -307,7 +318,6 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
       });
     } finally {
       setIsLoading(false);
-      setMessages(prev => { learnFromConversation(prev); return prev; });
     }
   };
 
