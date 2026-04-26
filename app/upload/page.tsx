@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -30,8 +30,15 @@ export default function UploadPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState('');
   const [isInstructionsOpen, setIsInstructionsOpen] = useState(false);
+  const [mobileOS, setMobileOS] = useState<'ios' | 'android' | null>(null);
   const [embeddingProgress, setEmbeddingProgress] = useState<{ done: number; total: number } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const ua = navigator.userAgent;
+    if (/iphone|ipad|ipod/i.test(ua)) setMobileOS('ios');
+    else if (/android/i.test(ua)) setMobileOS('android');
+  }, []);
 
   const handleNameSubmit = () => {
     if (!personName.trim()) {
@@ -393,64 +400,106 @@ export default function UploadPage() {
               카카오톡 대화 내보내기 파일 (.txt 또는 .csv)
             </p>
 
-            {/* Drop zone */}
-            <div
-              onClick={() => fileInputRef.current?.click()}
-              onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
-              onDragLeave={() => setIsDragging(false)}
-              onDrop={handleDrop}
-              style={{
-                border: `2px dashed ${isDragging ? '#a78bfa' : selectedFile ? '#6d28d9' : 'rgba(30,39,56,0.9)'}`,
+            {/* 모바일: 카카오톡 내보내기 가이드 먼저 */}
+            {mobileOS && (
+              <div style={{
+                background: 'rgba(167,139,250,0.06)',
+                border: '1px solid rgba(167,139,250,0.2)',
                 borderRadius: '14px',
-                padding: '2.5rem 1.5rem',
-                textAlign: 'center',
-                cursor: 'pointer',
-                transition: 'all 0.25s ease',
-                background: isDragging
-                  ? 'rgba(167,139,250,0.05)'
-                  : selectedFile
-                    ? 'rgba(109,40,217,0.06)'
-                    : 'transparent',
-                boxShadow: isDragging ? '0 0 20px rgba(167,139,250,0.15)' : 'none',
+                padding: '1.25rem',
                 marginBottom: '1.25rem',
-              }}
-            >
-              {/* Chat bubble icon */}
-              <svg
-                width="48"
-                height="48"
-                viewBox="0 0 48 48"
-                fill="none"
-                style={{ margin: '0 auto 1rem', display: 'block', opacity: selectedFile ? 1 : 0.5 }}
-              >
-                <rect x="4" y="8" width="40" height="28" rx="8" fill={selectedFile ? '#6d28d9' : '#1e2738'} />
-                <rect x="4" y="8" width="40" height="28" rx="8" stroke={selectedFile ? '#a78bfa' : '#334155'} strokeWidth="2" />
-                <path d="M16 40 L20 36 H10 Q8 36 8 34 V34" fill={selectedFile ? '#6d28d9' : '#1e2738'} />
-                <circle cx="16" cy="22" r="2.5" fill={selectedFile ? '#c4b5fd' : '#475569'} />
-                <circle cx="24" cy="22" r="2.5" fill={selectedFile ? '#c4b5fd' : '#475569'} />
-                <circle cx="32" cy="22" r="2.5" fill={selectedFile ? '#c4b5fd' : '#475569'} />
-              </svg>
+              }}>
+                <p style={{ color: '#a78bfa', fontSize: '0.8rem', fontWeight: 600, letterSpacing: '0.1em', marginBottom: '1rem' }}>
+                  {mobileOS === 'ios' ? '📱 iPhone에서 내보내기' : '📱 Android에서 내보내기'}
+                </p>
+                <ol style={{ margin: 0, paddingLeft: '1.25rem', color: '#94a3b8', fontSize: '0.9rem', lineHeight: 2.2 }}>
+                  {mobileOS === 'ios' ? (
+                    <>
+                      <li>카카오톡 → 대화방 열기</li>
+                      <li>우상단 <strong style={{ color: '#e2e8f0' }}>≡</strong> 터치</li>
+                      <li><strong style={{ color: '#e2e8f0' }}>대화 내보내기</strong> → 텍스트 파일</li>
+                      <li><strong style={{ color: '#e2e8f0' }}>파일에 저장</strong> 선택</li>
+                      <li>아래 버튼 눌러서 저장된 파일 선택</li>
+                    </>
+                  ) : (
+                    <>
+                      <li>카카오톡 → 대화방 열기</li>
+                      <li>우상단 <strong style={{ color: '#e2e8f0' }}>≡</strong> 터치</li>
+                      <li><strong style={{ color: '#e2e8f0' }}>채팅방 설정</strong> → 대화 내보내기</li>
+                      <li><strong style={{ color: '#e2e8f0' }}>텍스트만</strong> 선택 → 저장</li>
+                      <li>아래 버튼 눌러서 저장된 파일 선택</li>
+                    </>
+                  )}
+                </ol>
+              </div>
+            )}
 
-              {selectedFile ? (
-                <>
-                  <p style={{ color: '#c4b5fd', fontWeight: 600, marginBottom: '0.25rem' }}>
-                    {selectedFile.name}
-                  </p>
-                  <p style={{ color: '#64748b', fontSize: '0.85rem' }}>
-                    {(selectedFile.size / 1024).toFixed(1)} KB · 클릭하여 변경
-                  </p>
-                </>
-              ) : (
-                <>
-                  <p style={{ color: '#94a3b8', fontWeight: 500, marginBottom: '0.4rem' }}>
-                    카카오톡 대화 파일을 드래그하거나 클릭해서 업로드하세요
-                  </p>
-                  <p style={{ color: '#475569', fontSize: '0.8rem' }}>
-                    .txt 또는 .csv · 대화방 내보내기 후 저장된 파일
-                  </p>
-                </>
-              )}
-            </div>
+            {/* 파일 선택 영역 */}
+            {mobileOS ? (
+              // 모바일: 큰 버튼만
+              <div style={{ marginBottom: '1.25rem' }}>
+                {selectedFile ? (
+                  <div style={{
+                    border: '2px solid #6d28d9',
+                    borderRadius: '14px', padding: '1.5rem',
+                    textAlign: 'center', background: 'rgba(109,40,217,0.06)',
+                    marginBottom: '0.75rem',
+                  }}>
+                    <p style={{ color: '#c4b5fd', fontWeight: 600, marginBottom: '0.25rem' }}>{selectedFile.name}</p>
+                    <p style={{ color: '#64748b', fontSize: '0.85rem' }}>{(selectedFile.size / 1024 / 1024).toFixed(1)} MB</p>
+                  </div>
+                ) : null}
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  style={{
+                    width: '100%', padding: '1rem',
+                    background: selectedFile ? 'rgba(109,40,217,0.15)' : 'rgba(167,139,250,0.08)',
+                    border: `2px dashed ${selectedFile ? '#6d28d9' : 'rgba(167,139,250,0.3)'}`,
+                    borderRadius: '14px', color: selectedFile ? '#c4b5fd' : '#94a3b8',
+                    fontSize: '1rem', fontWeight: 600, cursor: 'pointer',
+                  }}
+                >
+                  {selectedFile ? '다른 파일 선택' : '📂  파일 선택하기'}
+                </button>
+              </div>
+            ) : (
+              // PC: 드래그앤드롭
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
+                onDragLeave={() => setIsDragging(false)}
+                onDrop={handleDrop}
+                style={{
+                  border: `2px dashed ${isDragging ? '#a78bfa' : selectedFile ? '#6d28d9' : 'rgba(30,39,56,0.9)'}`,
+                  borderRadius: '14px', padding: '2.5rem 1.5rem', textAlign: 'center',
+                  cursor: 'pointer', transition: 'all 0.25s ease',
+                  background: isDragging ? 'rgba(167,139,250,0.05)' : selectedFile ? 'rgba(109,40,217,0.06)' : 'transparent',
+                  boxShadow: isDragging ? '0 0 20px rgba(167,139,250,0.15)' : 'none',
+                  marginBottom: '1.25rem',
+                }}
+              >
+                <svg width="48" height="48" viewBox="0 0 48 48" fill="none"
+                  style={{ margin: '0 auto 1rem', display: 'block', opacity: selectedFile ? 1 : 0.5 }}>
+                  <rect x="4" y="8" width="40" height="28" rx="8" fill={selectedFile ? '#6d28d9' : '#1e2738'} />
+                  <rect x="4" y="8" width="40" height="28" rx="8" stroke={selectedFile ? '#a78bfa' : '#334155'} strokeWidth="2" />
+                  <path d="M16 40 L20 36 H10 Q8 36 8 34 V34" fill={selectedFile ? '#6d28d9' : '#1e2738'} />
+                  <circle cx="16" cy="22" r="2.5" fill={selectedFile ? '#c4b5fd' : '#475569'} />
+                  <circle cx="24" cy="22" r="2.5" fill={selectedFile ? '#c4b5fd' : '#475569'} />
+                  <circle cx="32" cy="22" r="2.5" fill={selectedFile ? '#c4b5fd' : '#475569'} />
+                </svg>
+                {selectedFile ? (
+                  <>
+                    <p style={{ color: '#c4b5fd', fontWeight: 600, marginBottom: '0.25rem' }}>{selectedFile.name}</p>
+                    <p style={{ color: '#64748b', fontSize: '0.85rem' }}>{(selectedFile.size / 1024).toFixed(1)} KB · 클릭하여 변경</p>
+                  </>
+                ) : (
+                  <>
+                    <p style={{ color: '#94a3b8', fontWeight: 500, marginBottom: '0.4rem' }}>파일을 드래그하거나 클릭해서 업로드</p>
+                    <p style={{ color: '#475569', fontSize: '0.8rem' }}>.txt 또는 .csv</p>
+                  </>
+                )}
+              </div>
+            )}
 
             <input
               ref={fileInputRef}
@@ -460,61 +509,39 @@ export default function UploadPage() {
               style={{ display: 'none' }}
             />
 
-            {/* Instructions accordion */}
-            <div
-              style={{
-                border: '1px solid rgba(30,39,56,0.7)',
-                borderRadius: '10px',
-                marginBottom: '1.25rem',
-                overflow: 'hidden',
-              }}
-            >
-              <button
-                onClick={() => setIsInstructionsOpen(v => !v)}
-                style={{
-                  width: '100%',
-                  padding: '0.8rem 1.1rem',
-                  background: 'transparent',
-                  border: 'none',
-                  color: '#94a3b8',
-                  fontSize: '0.875rem',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}
-              >
-                <span>카카오톡 내보내기 방법</span>
-                <span style={{ transition: 'transform 0.2s', transform: isInstructionsOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>▾</span>
-              </button>
-              <AnimatePresence>
-                {isInstructionsOpen && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.25 }}
-                    style={{ overflow: 'hidden' }}
-                  >
-                    <ol
-                      style={{
-                        padding: '0.5rem 1.1rem 1rem 2.2rem',
-                        color: '#64748b',
-                        fontSize: '0.85rem',
-                        lineHeight: 2,
-                        margin: 0,
-                      }}
+            {/* PC용 가이드 아코디언 */}
+            {!mobileOS && (
+              <div style={{ border: '1px solid rgba(30,39,56,0.7)', borderRadius: '10px', marginBottom: '1.25rem', overflow: 'hidden' }}>
+                <button
+                  onClick={() => setIsInstructionsOpen(v => !v)}
+                  style={{
+                    width: '100%', padding: '0.8rem 1.1rem', background: 'transparent',
+                    border: 'none', color: '#94a3b8', fontSize: '0.875rem', cursor: 'pointer',
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  }}
+                >
+                  <span>카카오톡 내보내기 방법</span>
+                  <span style={{ transition: 'transform 0.2s', transform: isInstructionsOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>▾</span>
+                </button>
+                <AnimatePresence>
+                  {isInstructionsOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.25 }}
+                      style={{ overflow: 'hidden' }}
                     >
-                      <li>카카오톡 앱에서 대화방을 엽니다</li>
-                      <li>오른쪽 상단 메뉴(≡) → 대화 내보내기</li>
-                      <li>텍스트 파일(.txt) 또는 CSV(.csv)로 저장합니다</li>
-                      <li>PC 카카오톡은 .csv, 모바일은 .txt로 내보내기 됩니다</li>
-                      <li>저장된 파일을 위에 업로드하세요</li>
-                    </ol>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+                      <ol style={{ padding: '0.5rem 1.1rem 1rem 2.2rem', color: '#64748b', fontSize: '0.85rem', lineHeight: 2, margin: 0 }}>
+                        <li>카카오톡 앱에서 대화방을 엽니다</li>
+                        <li>오른쪽 상단 메뉴(≡) → 대화 내보내기</li>
+                        <li>텍스트 파일(.txt) 또는 CSV(.csv)로 저장합니다</li>
+                        <li>PC 카카오톡은 .csv, 모바일은 .txt로 내보내기 됩니다</li>
+                        <li>저장된 파일을 위에 업로드하세요</li>
+                      </ol>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
 
             {/* Privacy notice */}
             <div style={{
