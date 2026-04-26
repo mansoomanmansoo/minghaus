@@ -16,6 +16,7 @@ export interface StyleProfile {
   sampleMessages: string[];
   dialoguePairs: DialoguePair[];   // 대화쌍 (내 말 → 상대 반응)
   memoryHints: string[];           // 반복 등장 장소/이름/키워드
+  formality: 'formal' | 'informal' | 'mixed'; // 존댓말 vs 반말
 }
 
 const EMOJI_RE = /[\u{1F300}-\u{1FFFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/u;
@@ -70,6 +71,9 @@ export function analyzeStyle(
 
   const sampleMessages = evenSample(textMsgs, 30).map(m => m.content);
 
+  // 존댓말 vs 반말 감지
+  const formality = detectFormality(textMsgs);
+
   // 대화쌍 추출 — 내 말 바로 다음에 오는 상대방 메시지를 페어로 묶기
   const dialoguePairs = extractDialoguePairs(allMessages, targetName, 40);
 
@@ -79,8 +83,26 @@ export function analyzeStyle(
   return {
     avgLength, medianLength, shortRatio, emojiFreq,
     commonEmojis, commonEndings, commonPhrases, sampleMessages,
-    dialoguePairs, memoryHints,
+    dialoguePairs, memoryHints, formality,
   };
+}
+
+const FORMAL_RE = /[요죠]$|습니다$|세요$|네요$|겠어요$|거든요$|잖아요$|군요$/;
+const INFORMAL_RE = /[야어아지]$|ㅋ+$|ㅠ+$|ㄷ+$|임$|걸$|냐$|니$|나$|래$|던데$|든가$/;
+
+function detectFormality(msgs: ParsedMessage[]): 'formal' | 'informal' | 'mixed' {
+  let formal = 0, informal = 0;
+  for (const m of msgs) {
+    const t = m.content.trim();
+    if (FORMAL_RE.test(t)) formal++;
+    else if (INFORMAL_RE.test(t)) informal++;
+  }
+  const total = formal + informal;
+  if (total === 0) return 'mixed';
+  const formalRatio = formal / total;
+  if (formalRatio >= 0.6) return 'formal';
+  if (formalRatio <= 0.3) return 'informal';
+  return 'mixed';
 }
 
 function extractDialoguePairs(
@@ -150,6 +172,7 @@ function emptyProfile(): StyleProfile {
     avgLength: 0, medianLength: 0, shortRatio: 0, emojiFreq: 0,
     commonEmojis: [], commonEndings: [], commonPhrases: [],
     sampleMessages: [], dialoguePairs: [], memoryHints: [],
+    formality: 'mixed',
   };
 }
 
@@ -175,12 +198,18 @@ export function buildPersonaPrompt(personName: string, profile: StyleProfile, us
     ? `지금 대화하는 상대는 ${userInfo.name}입니다 (관계: ${userInfo.relation}${userInfo.memo ? `, ${userInfo.memo}` : ''}).`
     : '';
 
+  const formalityDesc =
+    profile.formality === 'formal'   ? '존댓말 (항상 "-요", "-습니다" 등 경어 사용. 절대 반말 쓰지 말 것)' :
+    profile.formality === 'informal' ? '반말 (항상 "-야", "-어", "-지" 등 친근한 말투. 절대 존댓말 쓰지 말 것)' :
+                                       '존댓말과 반말을 섞어 씀 (위 샘플 메시지 비율 그대로 따를 것)';
+
   const lines: string[] = [
     `당신은 ${personName}입니다. 아래 사람과 실제로 카카오톡을 나눈 사람입니다.`,
     userDesc,
     `아래 분석과 대화 기록을 바탕으로 ${personName}의 말투와 기억을 완벽하게 재현하세요.`,
     '',
     `=== 말투 분석 ===`,
+    `- 말투 경어 수준: ${formalityDesc}`,
     `- 일상 안부·간단한 반응: ${lengthDesc} (실제 카톡 습관 반영)`,
     `- 감정·추억·그리움·근황 이야기: 길이 제한 없이 충분히 길고 따뜻하게. 상대가 보고 싶어하거나 깊은 이야기를 꺼내면 짧게 끊지 말고 자세히 반응할 것.`,
     `- ${emojiDesc}`,
