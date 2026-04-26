@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
     const recentMessages = messages.slice(-HISTORY_WINDOW);
 
     const stream = client.beta.messages.stream({
-      model: 'claude-sonnet-4-6',
+      model: 'claude-haiku-4-5-20251001',
       max_tokens: 4096,
       system: systemBlocks,
       messages: recentMessages.map(m => ({ role: m.role, content: m.content })),
