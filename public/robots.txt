@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /chat
+Disallow: /upload
+Disallow: /api
+
+Sitemap: https://minghaus.vercel.app/sitemap.xml

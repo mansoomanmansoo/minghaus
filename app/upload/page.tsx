@@ -558,7 +558,7 @@ export default function UploadPage() {
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
               </svg>
               <span style={{ color: '#64748b', fontSize: '0.8rem', lineHeight: 1.5 }}>
-                업로드된 대화는 <strong style={{ color: '#94a3b8' }}>암호화되어 저장</strong>되며, 운영자를 포함한 누구도 내용을 볼 수 없습니다.
+                업로드된 대화는 <strong style={{ color: '#94a3b8' }}>안전하게 보호</strong>되며, 운영자를 포함한 누구도 내용을 볼 수 없습니다.
               </span>
             </div>
 

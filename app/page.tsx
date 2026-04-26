@@ -100,7 +100,7 @@ export default function Home() {
           }}
         >
           <span>스크롤</span>
-          <motion.div animate={{ y: [0, 6, 0] }} transition={{ repeat: Infinity, duration: 1.5, ease: 'easeInOut' }}>
+          <motion.div animate={{ y: [0, 6, 0] }} transition={{ repeat: Infinity, duration: 1.5, ease: 'easeInOut' }} aria-hidden="true">
             ↓
           </motion.div>
         </motion.div>
@@ -254,7 +254,7 @@ export default function Home() {
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '1.25rem 2.5rem' }}>
             {[
-              { icon: '🔒', text: '모든 대화 데이터 암호화 저장' },
+              { icon: '🔒', text: '모든 대화 데이터 안전하게 보호' },
               { icon: '👁', text: '운영자도 내용을 볼 수 없습니다' },
               { icon: '🗑', text: '언제든 삭제 가능' },
               { icon: '🚫', text: '제3자 제공 없음' },
@@ -374,8 +374,8 @@ export default function Home() {
           그리운 사람이 있다면, echo가 함께합니다
         </p>
         <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem' }}>
-          <a href="#" style={{ color: '#475569', textDecoration: 'none' }}>개인정보처리방침</a>
-          <a href="#" style={{ color: '#475569', textDecoration: 'none' }}>이용약관</a>
+          <Link href="/privacy" style={{ color: '#475569', textDecoration: 'none' }}>개인정보처리방침</Link>
+          <Link href="/terms" style={{ color: '#475569', textDecoration: 'none' }}>이용약관</Link>
         </div>
       </footer>
     </main>
