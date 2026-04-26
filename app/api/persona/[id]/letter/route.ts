@@ -53,11 +53,11 @@ ${styleNote ? `=== ${personName}의 말투 ===\n${styleNote}` : ''}`;
   try {
     const response = await client.messages.create({
       model: 'claude-sonnet-4-6',
-      max_tokens: 2000,
+      max_tokens: 4096,
       system: systemPrompt,
       messages: [{
         role: 'user',
-        content: `${recipient}에게 쓰는 편지를 써주세요. 형식 없이 편지 본문만 써주세요.`,
+        content: `${recipient}에게 쓰는 편지를 써주세요. 형식 없이 편지 본문만 써주세요. 절대 중간에 끊지 말고 마무리 인사까지 완성해주세요.`,
       }],
     });
 
