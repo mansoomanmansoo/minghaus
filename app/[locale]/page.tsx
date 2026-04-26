@@ -25,6 +25,14 @@ export default function Home() {
   return (
     <main style={{ background: '#07090f', color: '#e2e8f0', minHeight: '100vh' }}>
 
+      {/* ── TOP NAV (locale switcher) ── */}
+      <div style={{
+        position: 'fixed', top: '1rem', right: '1.25rem',
+        zIndex: 100,
+      }}>
+        <LocaleSwitcher />
+      </div>
+
       {/* ── HERO ── */}
       <section style={{
         position: 'relative', height: '100vh',

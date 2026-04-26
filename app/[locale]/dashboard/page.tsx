@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslations, useLocale } from 'next-intl';
+import LocaleSwitcher from '@/components/LocaleSwitcher';
 
 interface PersonaCard {
   id: string;
@@ -92,6 +93,7 @@ export default function DashboardPage() {
           echo
         </Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <LocaleSwitcher />
           <span style={{ color: '#475569', fontSize: '0.85rem' }}>{userEmail}</span>
           <button
             onClick={handleLogout}
