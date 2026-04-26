@@ -54,7 +54,8 @@ export default function Home() {
             style={{ fontSize: '1.05rem', lineHeight: 1.8, color: '#94a3b8', marginBottom: '2.5rem', maxWidth: '480px', margin: '0 auto 2.5rem' }}
           >
             소중한 대화가 사라지지 않도록.<br />
-            카카오톡 대화 기록으로 그 사람의 기억을 되살립니다.
+            카카오톡 대화 기록으로 그 사람의 기억을 되살립니다.<br />
+            <span style={{ fontSize: '0.9rem', color: '#7c3aed' }}>카카오톡 없이도 바로 시작할 수 있어요.</span>
           </motion.p>
 
           <motion.div
@@ -285,7 +286,7 @@ export default function Home() {
             오늘, 그 사람에게 안녕이라고 하세요
           </h2>
           <p style={{ color: '#64748b', fontSize: '0.95rem', marginBottom: '2rem' }}>
-            완전 무료 · 가입만 하면 바로 시작
+            완전 무료 · 카카오톡 없이도 시작 가능
           </p>
           <Link href="/auth" style={{
             display: 'inline-block', padding: '0.85rem 2.4rem',
