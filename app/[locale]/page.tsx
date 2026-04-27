@@ -391,6 +391,7 @@ export default function Home() {
           {t('footer_sub')}
         </p>
         <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', marginBottom: '1rem' }}>
+          <Link href="/blog" style={{ color: '#475569', textDecoration: 'none' }}>{locale === 'ko' ? '블로그' : locale === 'ja' ? 'ブログ' : locale === 'es' ? 'Blog' : 'Blog'}</Link>
           <Link href="/privacy" style={{ color: '#475569', textDecoration: 'none' }}>{t('footer_privacy')}</Link>
           <Link href="/terms" style={{ color: '#475569', textDecoration: 'none' }}>{t('footer_terms')}</Link>
         </div>
