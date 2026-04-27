@@ -11,6 +11,8 @@ const COOKIE_OPTS = {
   path: '/',
 };
 
+export const REFRESH_COOKIE = 'echo_refresh';
+
 // POST /api/auth  body: { action: 'signup'|'signin'|'signout', email?, password? }
 export async function POST(req: NextRequest) {
   const { action, email, password } = await req.json() as {
@@ -23,6 +25,7 @@ export async function POST(req: NextRequest) {
 
   if (action === 'signout') {
     cookieStore.delete(SESSION_COOKIE);
+    cookieStore.delete(REFRESH_COOKIE);
     return NextResponse.json({ ok: true });
   }
 
@@ -35,9 +38,12 @@ export async function POST(req: NextRequest) {
       const { data, error } = await db.auth.signUp({ email, password });
       if (error) return NextResponse.json({ error: error.message }, { status: 400 });
 
-      const token = data.session?.access_token;
-      if (token) cookieStore.set(SESSION_COOKIE, token, COOKIE_OPTS);
-      return NextResponse.json({ ok: true, needsVerification: !data.session });
+      const session = data.session;
+      if (session) {
+        cookieStore.set(SESSION_COOKIE, session.access_token, COOKIE_OPTS);
+        cookieStore.set(REFRESH_COOKIE, session.refresh_token, COOKIE_OPTS);
+      }
+      return NextResponse.json({ ok: true, needsVerification: !session });
     }
 
     if (action === 'signin') {
@@ -45,6 +51,7 @@ export async function POST(req: NextRequest) {
       if (error) return NextResponse.json({ error: '이메일 또는 비밀번호가 올바르지 않습니다.' }, { status: 401 });
 
       cookieStore.set(SESSION_COOKIE, data.session.access_token, COOKIE_OPTS);
+      cookieStore.set(REFRESH_COOKIE, data.session.refresh_token, COOKIE_OPTS);
       return NextResponse.json({ ok: true });
     }
 
