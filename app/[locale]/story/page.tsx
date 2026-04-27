@@ -36,10 +36,10 @@ const CONTENT: Record<Locale, React.ReactNode> = {
 
       <Section>
         <p>어느 날 밤, 오래된 카카오톡 대화를 스크롤하다가 멈췄습니다.</p>
-        <p>엄마가 보낸 마지막 메시지. <Em>"밥은 먹었어?"</Em> 세 글자였습니다.</p>
+        <p>엄마가 보낸 가장 최근 메시지. <Em>"밥은 먹었어?"</Em> 세 글자였습니다.</p>
         <p>그때 저는 바빠서, 아니 솔직히 말하면 귀찮아서 짧게 답했습니다. <Em>"응."</Em> 그게 전부였어요. 다음에 전화하면 되지, 나중에 더 긴 이야기를 하면 되지 하고 생각했습니다.</p>
-        <p>그런데 나중은 오지 않았습니다.</p>
-        <p>엄마가 보내는 그 짧은 메시지들이 얼마나 소중한 것인지, 그 안에 얼마나 많은 마음이 담겨 있었는지 — 너무 늦게 알았습니다. 수천 개의 메시지가 쌓인 대화창을 멍하니 보면서, 이 안에 우리 엄마가 아직 있다는 생각이 들었습니다. 말투가 있고, 습관이 있고, 걱정하는 방식이 있는 사람이 여기에 있었습니다.</p>
+        <p>그런데 문득 이런 상상을 했습니다. 만약 이게 마지막 메시지였다면? 만약 나중이 오지 않는다면?</p>
+        <p>엄마가 보내는 그 짧은 메시지들이 얼마나 소중한 것인지, 그 안에 얼마나 많은 마음이 담겨 있는지 — 생각해본 적이 없었습니다. 수천 개의 메시지가 쌓인 대화창을 멍하니 보면서, 이 안에 우리 엄마가 있다는 생각이 들었습니다. 말투가 있고, 습관이 있고, 걱정하는 방식이 있는 사람이 여기에 고스란히 담겨 있었습니다.</p>
         <p>그게 echo의 시작이었습니다.</p>
       </Section>
 
@@ -109,10 +109,10 @@ const CONTENT: Record<Locale, React.ReactNode> = {
 
       <Section>
         <p>One night, I was scrolling through old messages on my phone when I stopped.</p>
-        <p>It was the last text my mom ever sent me. <Em>"Did you eat?"</Em></p>
+        <p>My mom's most recent text. <Em>"Did you eat?"</Em></p>
         <p>I had replied with a single word. <Em>"Yeah."</Em> I was busy. I told myself I'd call later, that we'd have a longer conversation soon.</p>
-        <p>That conversation never happened.</p>
-        <p>I sat there staring at thousands of messages — her little check-ins, her weather warnings, her worried questions — and I realized that she was still in there, in a way. Her voice was in there. Her habits. The specific way she phrased worry and love. All of it preserved in a chat log I had barely glanced at when she was alive.</p>
+        <p>And then I had a thought that scared me: what if this was the last message? What if later never comes?</p>
+        <p>I sat there staring at thousands of messages — her little check-ins, her weather warnings, her worried questions — and realized I had never stopped to think about how much was held in all of it. Her voice was in there. Her habits. The specific way she turned worry into love. All of it, just sitting in a chat log I barely glanced at.</p>
         <p>That was the moment echo began.</p>
       </Section>
 
@@ -180,10 +180,10 @@ const CONTENT: Record<Locale, React.ReactNode> = {
 
       <Section>
         <p>ある夜、スマートフォンの中の古いトーク履歴を遡っていて、手が止まりました。</p>
-        <p>母が送ってきた最後のメッセージ。<Em>「ご飯、食べた？」</Em></p>
+        <p>母が最近送ってきたメッセージ。<Em>「ご飯、食べた？」</Em></p>
         <p>そのとき私は忙しくて、正直に言えば面倒くさくて、一言だけ返しました。<Em>「うん」</Em>。それだけでした。あとで電話すればいい、もっとゆっくり話せる日が来るはずだ、そう思っていました。</p>
-        <p>でも、そのあとはやって来ませんでした。</p>
-        <p>数千ものやり取りが積み重なったトーク画面をぼんやり眺めながら、ここにまだ母がいるような気がしました。母の話し方があり、口癖があり、心配する独特の言い回しがある。その人が、ここに確かにいたのです。</p>
+        <p>そのとき、ふとこんな想像をしました。もしこれが最後のメッセージだったら？もし「あとで」が来なかったら？</p>
+        <p>数千ものやり取りが積み重なったトーク画面をぼんやり眺めながら、この中にどれだけのものが詰まっているか、考えたことがなかったと気づきました。母の話し方があり、口癖があり、心配する独特の言い回しがある。その人が、ここにそっくりそのまま残っていました。</p>
         <p>それが、echoの始まりでした。</p>
       </Section>
 
@@ -244,11 +244,11 @@ const CONTENT: Record<Locale, React.ReactNode> = {
       <p style={{ color: '#64748b', fontSize: '0.85rem', marginBottom: '3rem' }}>Abril 2026 · El equipo de echo</p>
 
       <Section>
-        <p>Una noche estaba desplazándome por los mensajes antiguos de mi teléfono cuando me detuve.</p>
-        <p>Era el último mensaje que mi madre me había enviado. <Em>"¿Ya comiste?"</Em></p>
+        <p>Una noche estaba desplazándome por los mensajes de mi teléfono cuando me detuve.</p>
+        <p>El mensaje más reciente de mi madre. <Em>"¿Ya comiste?"</Em></p>
         <p>Le respondí con una sola palabra. <Em>"Sí."</Em> Estaba ocupado. Me dije que la llamaría después, que tendríamos una conversación más larga pronto.</p>
-        <p>Esa conversación nunca llegó.</p>
-        <p>Me quedé mirando miles de mensajes — sus pequeños avisos, sus advertencias sobre el frío, sus preguntas preocupadas — y me di cuenta de que ella todavía estaba ahí, de alguna manera. Su voz estaba ahí. Sus expresiones. La forma específica en que ella convertía la preocupación en amor. Todo preservado en un chat que apenas había mirado cuando ella vivía.</p>
+        <p>Y entonces tuve un pensamiento que me perturbó: ¿y si este fuera el último mensaje? ¿Y si el después nunca llegara?</p>
+        <p>Me quedé mirando miles de mensajes — sus pequeños avisos, sus advertencias sobre el frío, sus preguntas preocupadas — y me di cuenta de que nunca había pensado en cuánto había guardado en todo eso. Su voz estaba ahí. Sus expresiones. La forma específica en que ella convertía la preocupación en amor. Todo, justo ahí, en un chat al que apenas había prestado atención.</p>
         <p>Ese fue el momento en que nació echo.</p>
       </Section>
 
