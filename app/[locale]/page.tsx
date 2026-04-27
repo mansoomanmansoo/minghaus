@@ -25,12 +25,32 @@ export default function Home() {
   return (
     <main style={{ background: '#07090f', color: '#e2e8f0', minHeight: '100vh' }}>
 
-      {/* ── TOP NAV (locale switcher) ── */}
+      {/* ── TOP NAV ── */}
       <div style={{
-        position: 'fixed', top: '1rem', right: '1.25rem',
-        zIndex: 100,
+        position: 'fixed', top: '1rem', left: 0, right: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '0 1.25rem',
+        zIndex: 100, pointerEvents: 'none',
       }}>
-        <LocaleSwitcher />
+        <Link
+          href="/story"
+          style={{
+            pointerEvents: 'auto',
+            fontSize: '0.8rem', color: '#64748b',
+            textDecoration: 'none',
+            padding: '0.3rem 0.75rem',
+            border: '1px solid rgba(30,39,56,0.6)',
+            borderRadius: '9999px',
+            background: 'rgba(7,9,15,0.6)',
+            backdropFilter: 'blur(8px)',
+            transition: 'color 0.2s',
+          }}
+        >
+          {locale === 'ko' ? '왜 만들었나' : locale === 'ja' ? 'なぜ作ったのか' : locale === 'es' ? 'Por qué' : 'Our story'}
+        </Link>
+        <div style={{ pointerEvents: 'auto' }}>
+          <LocaleSwitcher />
+        </div>
       </div>
 
       {/* ── HERO ── */}
@@ -104,6 +124,21 @@ export default function Home() {
           >
             {t('hero_free')}
           </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            transition={{ delay: 1.0, duration: 0.6 }}
+            style={{ marginTop: '1rem' }}
+          >
+            <Link href="/story" style={{
+              fontSize: '0.8rem', color: '#475569',
+              textDecoration: 'none',
+              borderBottom: '1px solid rgba(71,85,105,0.4)',
+              paddingBottom: '1px',
+            }}>
+              {locale === 'ko' ? '왜 만들었는지 읽어보기 →' : locale === 'ja' ? 'なぜ作ったのか →' : locale === 'es' ? 'Por qué lo creamos →' : 'Read why we built this →'}
+            </Link>
+          </motion.div>
         </div>
 
         <motion.div
@@ -391,7 +426,7 @@ export default function Home() {
           {t('footer_sub')}
         </p>
         <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', marginBottom: '1rem' }}>
-          <Link href="/blog" style={{ color: '#475569', textDecoration: 'none' }}>{locale === 'ko' ? '블로그' : locale === 'ja' ? 'ブログ' : locale === 'es' ? 'Blog' : 'Blog'}</Link>
+          <Link href="/story" style={{ color: '#475569', textDecoration: 'none' }}>{locale === 'ko' ? '만든 이유' : locale === 'ja' ? 'なぜ作ったのか' : locale === 'es' ? 'Nuestra historia' : 'Our story'}</Link>
           <Link href="/privacy" style={{ color: '#475569', textDecoration: 'none' }}>{t('footer_privacy')}</Link>
           <Link href="/terms" style={{ color: '#475569', textDecoration: 'none' }}>{t('footer_terms')}</Link>
         </div>

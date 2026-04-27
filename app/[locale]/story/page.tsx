@@ -5,22 +5,22 @@ type Locale = 'ko' | 'en' | 'ja' | 'es';
 
 const META: Record<Locale, { title: string; description: string; keywords: string }> = {
   ko: {
-    title: '그리운 사람에게 다시 말을 걸 수 있다면 — echo 블로그',
+    title: '그리운 사람에게 다시 말을 걸 수 있다면 — echo를 만든 이유',
     description: 'echo를 만든 이유, 그리고 보고 싶은 사람이 있는 모든 분들에게. 부모님, 이별, 오래된 친구, 할머니, 먼저 떠난 사람들을 위한 이야기.',
     keywords: '그리운 사람, 고인 AI, 돌아가신 부모님 AI, 이별 극복, 추억 대화, AI 페르소나, 카카오톡 추억, 그리움',
   },
   en: {
-    title: 'When You Wish You Could Talk to Them One More Time — echo blog',
+    title: 'When You Wish You Could Talk to Them One More Time — Why we built echo',
     description: 'Why we built echo, and who it\'s for. For everyone grieving a parent, a friendship, a love — or simply missing someone still here.',
     keywords: 'grief support app, AI memorial, talking to deceased, missing someone, chat with late parent, loss and remembrance, AI persona',
   },
   ja: {
-    title: 'もう一度、あの人と話せたら — echoブログ',
+    title: 'もう一度、あの人と話せたら — echoを作った理由',
     description: 'echoを作った理由——大切な人を恋しく思うすべての方へ。亡くなった方、離れた友人、疎遠になった家族。あの人ともう一度。',
     keywords: '故人 AI, 亡くなった人と話す, 懐かしい人, グリーフケア, LINE思い出, 大切な人, 記憶',
   },
   es: {
-    title: 'Si pudieras hablar con ellos una vez más — blog de echo',
+    title: 'Si pudieras hablar con ellos una vez más — Por qué creamos echo',
     description: 'Por qué creamos echo, y para quién. Para todos los que extrañan a un padre, un amor, un viejo amigo — o simplemente a alguien que ya no está.',
     keywords: 'hablar con difuntos IA, extrañar a alguien, duelo, memorial digital, recordar a un ser querido, WhatsApp recuerdos',
   },
@@ -336,7 +336,7 @@ export async function generateMetadata(
   const l = (locale as Locale) in META ? (locale as Locale) : 'ko';
   const m = META[l];
   const base = 'https://minghaus.vercel.app';
-  const canonical = l === 'ko' ? `${base}/blog` : `${base}/${l}/blog`;
+  const canonical = l === 'ko' ? `${base}/story` : `${base}/${l}/story`;
 
   return {
     title: m.title,
@@ -346,10 +346,10 @@ export async function generateMetadata(
     alternates: {
       canonical,
       languages: {
-        ko: `${base}/blog`,
-        en: `${base}/en/blog`,
-        ja: `${base}/ja/blog`,
-        es: `${base}/es/blog`,
+        ko: `${base}/story`,
+        en: `${base}/en/story`,
+        ja: `${base}/ja/story`,
+        es: `${base}/es/story`,
       },
     },
     openGraph: {
