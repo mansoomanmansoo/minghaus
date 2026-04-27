@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
-import { getPersona } from '@/lib/store';
+import { getPersona, getLetter, saveLetter } from '@/lib/store';
 import { getSessionUser } from '@/lib/auth';
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
@@ -16,6 +16,14 @@ export async function POST(
   const persona = await getPersona(id);
   if (!persona) return new Response(JSON.stringify({ error: '페르소나를 찾을 수 없습니다.' }), { status: 404 });
   if (persona.userId !== user.id) return new Response(JSON.stringify({ error: '접근 권한이 없습니다.' }), { status: 403 });
+
+  // Return cached letter if exists
+  const cached = await getLetter(id);
+  if (cached) {
+    return new Response(JSON.stringify({ letter: cached, cached: true }), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
 
   const { personName, recentContext, styleNote, userInfo, learnedFacts } = persona;
 
@@ -62,7 +70,8 @@ ${styleNote ? `=== ${personName}의 말투 ===\n${styleNote}` : ''}`;
     });
 
     const letter = response.content[0].type === 'text' ? response.content[0].text : '';
-    return new Response(JSON.stringify({ letter }), {
+    await saveLetter(id, letter);
+    return new Response(JSON.stringify({ letter, cached: false }), {
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (err) {

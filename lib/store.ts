@@ -68,6 +68,16 @@ export async function updateLearnedFacts(id: string, learnedFacts: string[]): Pr
   if (error) throw error;
 }
 
+export async function getLetter(id: string): Promise<string | null> {
+  const { data } = await db.from('personas').select('letter').eq('id', id).single();
+  return (data as { letter?: string | null } | null)?.letter ?? null;
+}
+
+export async function saveLetter(id: string, letter: string): Promise<void> {
+  const { error } = await db.from('personas').update({ letter }).eq('id', id);
+  if (error) throw error;
+}
+
 interface PersonaRow {
   id: string;
   user_id: string;

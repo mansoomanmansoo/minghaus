@@ -15,6 +15,7 @@ type Phase = 'loading' | 'envelope' | 'opening' | 'reading';
 export default function LetterView({ personaId, personName, onClose }: Props) {
   const [phase, setPhase] = useState<Phase>('loading');
   const [letter, setLetter] = useState('');
+  const [isCached, setIsCached] = useState(false);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
   const letterRef = useRef<HTMLDivElement>(null);
@@ -22,9 +23,12 @@ export default function LetterView({ personaId, personName, onClose }: Props) {
   useEffect(() => {
     fetch(`/api/persona/${personaId}/letter`, { method: 'POST' })
       .then(r => r.json())
-      .then((d: { letter?: string; error?: string }) => {
+      .then((d: { letter?: string; cached?: boolean; error?: string }) => {
         if (d.error) { setError(d.error); }
-        else { setLetter(d.letter ?? ''); }
+        else {
+          setLetter(d.letter ?? '');
+          setIsCached(d.cached ?? false);
+        }
         setPhase('envelope');
       })
       .catch(() => { setError('편지를 불러오지 못했어요.'); setPhase('envelope'); });
@@ -142,7 +146,7 @@ export default function LetterView({ personaId, personName, onClose }: Props) {
                     {personName}에게서 편지가 왔어요
                   </p>
                   <p style={{ color: '#475569', fontSize: '0.78rem', marginBottom: '1.75rem' }}>
-                    봉투를 열어보세요
+                    {isCached ? '받았던 편지를 다시 읽어보세요' : '봉투를 열어보세요'}
                   </p>
 
                   <motion.button
