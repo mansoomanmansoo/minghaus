@@ -17,27 +17,54 @@ export interface AuthUser {
   email: string;
 }
 
+interface JwtPayload {
+  sub: string;
+  email: string;
+  exp: number;
+}
+
+function decodeJwt(token: string): JwtPayload | null {
+  try {
+    const [, payload] = token.split('.');
+    const decoded = JSON.parse(Buffer.from(payload, 'base64url').toString('utf-8'));
+    if (!decoded.sub || !decoded.exp) return null;
+    return decoded as JwtPayload;
+  } catch {
+    return null;
+  }
+}
+
 export async function getSessionUser(): Promise<AuthUser | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get(SESSION_COOKIE)?.value;
   if (!token) return null;
 
-  // Try access token first
-  const { data: { user }, error } = await db.auth.getUser(token);
-  if (!error && user) return { id: user.id, email: user.email! };
+  // Decode JWT locally — no network call needed for valid tokens
+  const payload = decodeJwt(token);
+  if (!payload) return null;
 
-  // Access token expired — try to refresh
+  const nowSec = Math.floor(Date.now() / 1000);
+
+  // Token still valid (60s buffer)
+  if (payload.exp > nowSec + 60) {
+    return { id: payload.sub, email: payload.email };
+  }
+
+  // Token expired — try refresh
   const refreshToken = cookieStore.get(REFRESH_COOKIE)?.value;
   if (!refreshToken) return null;
 
-  const { data, error: refreshError } = await db.auth.refreshSession({ refresh_token: refreshToken });
-  if (refreshError || !data.session || !data.user) return null;
+  try {
+    const { data, error } = await db.auth.refreshSession({ refresh_token: refreshToken });
+    if (error || !data.session || !data.user) return null;
 
-  // Update cookies with new tokens
-  cookieStore.set(SESSION_COOKIE, data.session.access_token, COOKIE_OPTS);
-  cookieStore.set(REFRESH_COOKIE, data.session.refresh_token, COOKIE_OPTS);
+    cookieStore.set(SESSION_COOKIE, data.session.access_token, COOKIE_OPTS);
+    cookieStore.set(REFRESH_COOKIE, data.session.refresh_token, COOKIE_OPTS);
 
-  return { id: data.user.id, email: data.user.email! };
+    return { id: data.user.id, email: data.user.email! };
+  } catch {
+    return null;
+  }
 }
 
 export async function requireAuth(): Promise<AuthUser> {
