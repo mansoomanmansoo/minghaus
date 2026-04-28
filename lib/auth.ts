@@ -25,8 +25,12 @@ interface JwtPayload {
 
 function decodeJwt(token: string): JwtPayload | null {
   try {
-    const [, payload] = token.split('.');
-    const decoded = JSON.parse(Buffer.from(payload, 'base64url').toString('utf-8'));
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    // base64url → base64: replace chars and add padding
+    const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const padded = b64 + '='.repeat((4 - b64.length % 4) % 4);
+    const decoded = JSON.parse(Buffer.from(padded, 'base64').toString('utf-8'));
     if (!decoded.sub || !decoded.exp) return null;
     return decoded as JwtPayload;
   } catch {

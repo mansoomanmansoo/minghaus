@@ -14,5 +14,6 @@ export async function GET() {
     messageCount: p.messageCount,
     coveredCount: p.coveredCount,
     createdAt: p.createdAt,
+    hasLetter: p.hasLetter,
   })));
 }

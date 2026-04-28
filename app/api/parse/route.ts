@@ -112,7 +112,7 @@ export async function POST(req: NextRequest) {
             id, userId: user.id, personName,
             recentContext: '', styleNote, userInfo,
             messageCount: 0, coveredCount: 0, learnedFacts: [],
-            createdAt: new Date(),
+            createdAt: new Date(), hasLetter: false,
           });
           await sendEvent({ type: 'ready', id, personName, messageCount: 0, coveredCount: 0 });
         } catch (err) {
@@ -150,7 +150,7 @@ export async function POST(req: NextRequest) {
       id, userId: user.id, personName,
       recentContext, styleNote, userInfo,
       messageCount: parsed.messages.length, coveredCount,
-      learnedFacts: [], createdAt: new Date(),
+      learnedFacts: [], createdAt: new Date(), hasLetter: false,
     });
 
     (async () => {

@@ -17,6 +17,7 @@ export interface PersonaStore {
   coveredCount: number;
   learnedFacts: string[];
   createdAt: Date;
+  hasLetter: boolean;
 }
 
 export async function savePersona(persona: PersonaStore): Promise<void> {
@@ -49,7 +50,7 @@ export async function getPersona(id: string): Promise<PersonaStore | null> {
 export async function listPersonas(userId: string): Promise<PersonaStore[]> {
   const { data, error } = await db
     .from('personas')
-    .select('id, user_id, person_name, user_info, message_count, covered_count, learned_facts, created_at')
+    .select('id, user_id, person_name, user_info, message_count, covered_count, learned_facts, created_at, letter')
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
 
@@ -89,6 +90,7 @@ interface PersonaRow {
   covered_count: number | null;
   learned_facts: string[] | null;
   created_at: string;
+  letter?: string | null;
 }
 
 function dbRowToPersona(d: PersonaRow): PersonaStore {
@@ -103,6 +105,7 @@ function dbRowToPersona(d: PersonaRow): PersonaStore {
     coveredCount: d.covered_count ?? 0,
     learnedFacts: d.learned_facts ?? [],
     createdAt: new Date(d.created_at),
+    hasLetter: !!(d.letter),
   };
 }
 

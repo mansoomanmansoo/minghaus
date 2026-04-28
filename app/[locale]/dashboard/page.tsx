@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslations, useLocale } from 'next-intl';
 import LocaleSwitcher from '@/components/LocaleSwitcher';
+import LetterView from '@/components/LetterView';
 
 interface PersonaCard {
   id: string;
@@ -14,6 +15,7 @@ interface PersonaCard {
   messageCount: number;
   coveredCount: number;
   createdAt: string;
+  hasLetter: boolean;
 }
 
 export default function DashboardPage() {
@@ -24,6 +26,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [userEmail, setUserEmail] = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [letterPersona, setLetterPersona] = useState<{ id: string; personName: string } | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -250,41 +253,62 @@ export default function DashboardPage() {
                   </div>
 
                   {/* Actions */}
-                  <div style={{ display: 'flex', gap: '0.6rem' }}>
-                    <Link
-                      href={`/chat/${p.id}`}
-                      style={{
-                        flex: 1,
-                        padding: '0.6rem',
-                        background: 'linear-gradient(135deg, rgba(124,58,237,0.5), rgba(167,139,250,0.3))',
-                        border: '1px solid rgba(167,139,250,0.3)',
-                        borderRadius: '8px',
-                        color: '#e2e8f0',
-                        fontSize: '0.85rem',
-                        fontWeight: 600,
-                        textDecoration: 'none',
-                        textAlign: 'center',
-                        transition: 'all 0.2s',
-                      }}
-                    >
-                      {t('card_chat')}
-                    </Link>
-                    <button
-                      onClick={() => handleDelete(p.id, p.personName)}
-                      disabled={deletingId === p.id}
-                      style={{
-                        padding: '0.6rem 0.75rem',
-                        background: 'transparent',
-                        border: '1px solid rgba(30,39,56,0.9)',
-                        borderRadius: '8px',
-                        color: '#475569',
-                        fontSize: '0.82rem',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                      }}
-                    >
-                      {deletingId === p.id ? '...' : t('card_delete')}
-                    </button>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    {p.hasLetter && (
+                      <button
+                        onClick={() => setLetterPersona({ id: p.id, personName: p.personName })}
+                        style={{
+                          width: '100%',
+                          padding: '0.6rem',
+                          background: 'linear-gradient(135deg, rgba(124,58,237,0.15), rgba(167,139,250,0.08))',
+                          border: '1px solid rgba(167,139,250,0.35)',
+                          borderRadius: '8px',
+                          color: '#c4b5fd',
+                          fontSize: '0.85rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          textAlign: 'center',
+                        }}
+                      >
+                        ✉️ 받은 편지 읽기
+                      </button>
+                    )}
+                    <div style={{ display: 'flex', gap: '0.6rem' }}>
+                      <Link
+                        href={`/chat/${p.id}`}
+                        style={{
+                          flex: 1,
+                          padding: '0.6rem',
+                          background: 'linear-gradient(135deg, rgba(124,58,237,0.5), rgba(167,139,250,0.3))',
+                          border: '1px solid rgba(167,139,250,0.3)',
+                          borderRadius: '8px',
+                          color: '#e2e8f0',
+                          fontSize: '0.85rem',
+                          fontWeight: 600,
+                          textDecoration: 'none',
+                          textAlign: 'center',
+                          transition: 'all 0.2s',
+                        }}
+                      >
+                        {t('card_chat')}
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(p.id, p.personName)}
+                        disabled={deletingId === p.id}
+                        style={{
+                          padding: '0.6rem 0.75rem',
+                          background: 'transparent',
+                          border: '1px solid rgba(30,39,56,0.9)',
+                          borderRadius: '8px',
+                          color: '#475569',
+                          fontSize: '0.82rem',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                        }}
+                      >
+                        {deletingId === p.id ? '...' : t('card_delete')}
+                      </button>
+                    </div>
                   </div>
                 </motion.div>
               ))}
@@ -292,6 +316,16 @@ export default function DashboardPage() {
           </div>
         )}
       </main>
+
+      <AnimatePresence>
+        {letterPersona && (
+          <LetterView
+            personaId={letterPersona.id}
+            personName={letterPersona.personName}
+            onClose={() => setLetterPersona(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
